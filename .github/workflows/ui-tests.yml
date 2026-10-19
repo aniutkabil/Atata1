@@ -1,0 +1,45 @@
+name: UI tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      HEADLESS: "true"
+      ATATA_BASE_URL: https://demo.atata.io/
+      ATATA_USERNAME: ${{ secrets.ATATA_USERNAME || 'admin@mail.com' }}
+      ATATA_PASSWORD: ${{ secrets.ATATA_PASSWORD || 'abc123' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Install Chrome
+        uses: browser-actions/setup-chrome@v1
+
+      - name: Restore
+        run: dotnet restore src/Atata.PerformanceShowcase.Tests/Atata.PerformanceShowcase.Tests.csproj
+
+      - name: Test
+        run: dotnet test src/Atata.PerformanceShowcase.Tests/Atata.PerformanceShowcase.Tests.csproj --no-restore --logger "trx;LogFileName=ui-tests.trx" --results-directory TestResults
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-test-results
+          path: TestResults/**/*.trx
+          if-no-files-found: warn
+          retention-days: 7

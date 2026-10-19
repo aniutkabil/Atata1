@@ -1,0 +1,10 @@
+{
+  "removeArmchair": {
+    "productName": "Armchair",
+    "expectedSummary": {
+      "totalPrice": 570.00,
+      "productCount": 4,
+      "totalAmount": 245.00
+    }
+  }
+}
